@@ -363,16 +363,18 @@ local function rmBox(ch)
 	hbBoxes[ch]=nil
 end
 local function mkBox(ch,root)
-	if hbBoxes[ch]and hbBoxes[ch].Parent then
-		hbBoxes[ch].Size=Vector3.new(HB_SIZE,HB_SIZE,HB_SIZE)
-		hbBoxes[ch].CFrame=root.CFrame return
+	if not hbBoxes[ch]or not hbBoxes[ch].Parent then
+		local b=Instance.new("Part")
+		b.Anchored=true b.CanCollide=false b.CanTouch=false b.CanQuery=false
+		b.Massless=true b.CastShadow=false
+		b.BrickColor=BrickColor.new("Bright red")
+		b.Material=Enum.Material.Neon
+		b.Transparency=0.5
+		b.Parent=workspace.CurrentCamera
+		hbBoxes[ch]=b
 	end
-	local b=Instance.new("Part")
-	b.Anchored=true b.CanCollide=false b.CanTouch=false b.CanQuery=false
-	b.Massless=true b.CastShadow=false b.BrickColor=BrickColor.new("Bright red")
-	b.Material=Enum.Material.Neon b.Transparency=0.88
-	b.Size=Vector3.new(HB_SIZE,HB_SIZE,HB_SIZE) b.CFrame=root.CFrame
-	b.Parent=workspace.CurrentCamera hbBoxes[ch]=b
+	hbBoxes[ch].Size=Vector3.new(HB_SIZE,HB_SIZE,HB_SIZE)
+	hbBoxes[ch].CFrame=root.CFrame
 end
 local function rmHL(ch)
 	if hls[ch]and hls[ch].Parent then hls[ch]:Destroy()end hls[ch]=nil
@@ -469,7 +471,8 @@ RunService.Heartbeat:Connect(function()
 		local root=ch:FindFirstChild("HumanoidRootPart") if not root then continue end
 		if hbOn then
 			if not origSz[root]then origSz[root]=root.Size end
-			root.Size=Vector3.new(HB_SIZE,HB_SIZE,HB_SIZE) mkBox(ch,root)
+			root.Size=Vector3.new(HB_SIZE,HB_SIZE,HB_SIZE)
+			mkBox(ch,root)
 		else
 			if origSz[root]then root.Size=origSz[root] origSz[root]=nil end
 			if hbBoxes[ch]then rmBox(ch)end
@@ -477,10 +480,10 @@ RunService.Heartbeat:Connect(function()
 		if espOn then mkHL(ch) mkTag(ch,pl) updTag(ch)
 		else if hls[ch]then rmHL(ch)end if tags[ch]then rmTag(ch)end end
 	end
-	for c in pairs(hbBoxes)do if not c.Parent then rmBox(c)end end
-	for c in pairs(hls)do if not c.Parent then rmHL(c)end end
-	for c in pairs(tags)do if not c.Parent then rmTag(c)end end
 	for r in pairs(origSz)do if not r.Parent then origSz[r]=nil end end
+	for ch in pairs(hbBoxes)do if not ch.Parent then rmBox(ch)end end
+	for ch in pairs(hls)do if not ch.Parent then rmHL(ch)end end
+	for ch in pairs(tags)do if not ch.Parent then rmTag(ch)end end
 end)
 RunService.Stepped:Connect(function()
 	if not ncOn then return end
@@ -490,12 +493,17 @@ end)
 bHB.MouseButton1Click:Connect(function()
 	hbOn=not hbOn bHB.Text=hbOn and"DISABLE HITBOX"or"ENABLE HITBOX"
 	bHB.BackgroundColor3=hbOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(68,34,175)
-	if not hbOn then for c in pairs(hbBoxes)do rmBox(c)end end updS()
+	if not hbOn then
+		for r,s in pairs(origSz)do if r.Parent then r.Size=s end end
+		origSz={}
+		for ch in pairs(hbBoxes)do rmBox(ch)end
+	end
+	updS()
 end)
 bESP.MouseButton1Click:Connect(function()
 	espOn=not espOn bESP.Text=espOn and"DISABLE ESP + TAGS"or"ENABLE ESP + TAGS"
 	bESP.BackgroundColor3=espOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(12,62,138)
-	if not espOn then for c in pairs(hls)do rmHL(c)end for c in pairs(tags)do rmTag(c)end end updS()
+	if not espOn then for ch in pairs(hls)do rmHL(ch)end for ch in pairs(tags)do rmTag(ch)end end updS()
 end)
 bFly.MouseButton1Click:Connect(function()
 	if flyOn then stopFly() bFly.Text="ENABLE FLY" bFly.BackgroundColor3=Color3.fromRGB(12,62,138)
