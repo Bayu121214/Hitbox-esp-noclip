@@ -1,524 +1,206 @@
 local g=gethui and gethui()or game:GetService("CoreGui")
 for _,v in ipairs(g:GetChildren())do if v.Name=="HBX"then v:Destroy()end end
-local sg=Instance.new("ScreenGui")
-sg.Name="HBX"
-sg.ResetOnSpawn=false
-sg.DisplayOrder=999
-sg.IgnoreGuiInset=true
-sg.Parent=g
-local Players=game:GetService("Players")
-local RunService=game:GetService("RunService")
-local UIS=game:GetService("UserInputService")
-local TS=game:GetService("TweenService")
-local LP=Players.LocalPlayer
-local HB_MIN,HB_MAX=1,30
-local FLY_MIN,FLY_MAX=10,200
-local WS_MIN,WS_MAX=1,200
-local HB_SIZE=5
-local hbOn,espOn,ncOn,flyOn=false,false,false,false
-local flySpd,walkSpd=60,16
-local origSz,hbBoxes,hls,tags={},{},{},{}
-local flyC,flyBV,flyBG=nil,nil,nil
-local function cr(p,r)
-	local c=Instance.new("UICorner")
-	c.CornerRadius=UDim.new(0,r or 6)
-	c.Parent=p
+local sg=Instance.new("ScreenGui")sg.Name="HBX"sg.ResetOnSpawn=false sg.DisplayOrder=999 sg.IgnoreGuiInset=true sg.Parent=g
+local Pl=game:GetService("Players")local RS=game:GetService("RunService")local UIS=game:GetService("UserInputService")local LP=Pl.LocalPlayer
+local HN,HX,FN,FX,WN,WX,JN,JX=1,100,10,200,1,200,0,500
+local HS,FS,WS,JS=5,60,16,50
+local hbOn,eOn,nOn,fOn,sOn=false,false,false,false,false
+local saTgt=""
+local hbB,hls,tags={},{},{}
+local fC,fBV,fBG=nil,nil,nil
+local function cr(p,r)local c=Instance.new("UICorner")c.CornerRadius=UDim.new(0,r or 6)c.Parent=p end
+local sd=Instance.new("TextButton")sd.Size=UDim2.new(0,34,0,100)sd.Position=UDim2.new(0,4,0.5,-50)sd.BackgroundColor3=Color3.fromRGB(22,10,55)sd.BorderSizePixel=0 sd.Text="H\nI\nT\nB\nO\nX"sd.TextColor3=Color3.fromRGB(185,145,255)sd.TextSize=10 sd.Font=Enum.Font.GothamBold sd.ZIndex=20 sd.Parent=sg cr(sd,6)
+local pn=Instance.new("Frame")pn.Size=UDim2.new(0,240,0.85,0)pn.Position=UDim2.new(0,42,0.07,0)pn.BackgroundColor3=Color3.fromRGB(10,8,18)pn.BorderSizePixel=0 pn.ZIndex=10 pn.ClipsDescendants=true pn.Parent=sg cr(pn,10)
+local tb=Instance.new("Frame")tb.Size=UDim2.new(1,0,0,36)tb.BackgroundColor3=Color3.fromRGB(18,10,48)tb.BorderSizePixel=0 tb.ZIndex=11 tb.Parent=pn cr(tb,10)
+local p2=Instance.new("Frame")p2.Size=UDim2.new(1,0,0,12)p2.Position=UDim2.new(0,0,1,-12)p2.BackgroundColor3=Color3.fromRGB(18,10,48)p2.BorderSizePixel=0 p2.ZIndex=11 p2.Parent=tb
+local tl=Instance.new("TextLabel")tl.Size=UDim2.new(1,-40,1,0)tl.Position=UDim2.new(0,8,0,0)tl.BackgroundTransparency=1 tl.Text="HITBOX EXPANDER"tl.TextColor3=Color3.fromRGB(178,142,255)tl.TextSize=12 tl.Font=Enum.Font.GothamBold tl.TextXAlignment=Enum.TextXAlignment.Left tl.ZIndex=12 tl.Parent=tb
+local xb=Instance.new("TextButton")xb.Size=UDim2.new(0,26,0,26)xb.Position=UDim2.new(1,-30,0.5,-13)xb.BackgroundColor3=Color3.fromRGB(138,22,42)xb.BorderSizePixel=0 xb.Text="X"xb.TextColor3=Color3.fromRGB(255,182,182)xb.TextSize=12 xb.Font=Enum.Font.GothamBold xb.ZIndex=13 xb.Parent=tb cr(xb,5)
+local tr=Instance.new("Frame")tr.Size=UDim2.new(1,-10,0,26)tr.Position=UDim2.new(0,5,0,38)tr.BackgroundColor3=Color3.fromRGB(14,10,28)tr.BorderSizePixel=0 tr.ZIndex=11 tr.Parent=pn cr(tr,6)
+local tM=Instance.new("TextButton")tM.Size=UDim2.new(0.5,-3,1,-4)tM.Position=UDim2.new(0,2,0,2)tM.BackgroundColor3=Color3.fromRGB(68,34,175)tM.BorderSizePixel=0 tM.Text="MAIN"tM.TextColor3=Color3.fromRGB(255,255,255)tM.TextSize=10 tM.Font=Enum.Font.GothamBold tM.ZIndex=12 tM.Parent=tr cr(tM,4)
+local tC=Instance.new("TextButton")tC.Size=UDim2.new(0.5,-3,1,-4)tC.Position=UDim2.new(0.5,1,0,2)tC.BackgroundColor3=Color3.fromRGB(24,16,52)tC.BorderSizePixel=0 tC.Text="CHARACTER"tC.TextColor3=Color3.fromRGB(138,108,198)tC.TextSize=10 tC.Font=Enum.Font.GothamBold tC.ZIndex=12 tC.Parent=tr cr(tC,4)
+local sc=Instance.new("ScrollingFrame")sc.Size=UDim2.new(1,0,1,-68)sc.Position=UDim2.new(0,0,0,68)sc.BackgroundTransparency=1 sc.BorderSizePixel=0 sc.ScrollBarThickness=3 sc.ScrollBarImageColor3=Color3.fromRGB(90,50,200)sc.CanvasSize=UDim2.new(0,0,0,600)sc.ZIndex=11 sc.Parent=pn
+local cM=Instance.new("Frame")cM.Size=UDim2.new(1,-10,0,600)cM.Position=UDim2.new(0,5,0,4)cM.BackgroundTransparency=1 cM.ZIndex=11 cM.Visible=true cM.Parent=sc
+local cC=Instance.new("Frame")cC.Size=UDim2.new(1,-10,0,600)cC.Position=UDim2.new(0,5,0,4)cC.BackgroundTransparency=1 cC.ZIndex=11 cC.Visible=false cC.Parent=sc
+local function mkB(p,t,y,c)local b=Instance.new("TextButton")b.Size=UDim2.new(1,0,0,34)b.Position=UDim2.new(0,0,0,y)b.BackgroundColor3=c or Color3.fromRGB(68,34,175)b.BorderSizePixel=0 b.Text=t b.TextColor3=Color3.fromRGB(255,255,255)b.TextSize=12 b.Font=Enum.Font.GothamBold b.ZIndex=12 b.Parent=p cr(b,6)return b end
+local function mkL(p,t,y,c)local l=Instance.new("TextLabel")l.Size=UDim2.new(1,0,0,16)l.Position=UDim2.new(0,0,0,y)l.BackgroundTransparency=1 l.Text=t l.TextColor3=c or Color3.fromRGB(152,122,212)l.TextSize=11 l.Font=Enum.Font.Gotham l.TextXAlignment=Enum.TextXAlignment.Left l.ZIndex=12 l.Parent=p return l end
+local function mkS(p,y,fc,kc,ia)local t=Instance.new("Frame")t.Size=UDim2.new(1,0,0,16)t.Position=UDim2.new(0,0,0,y)t.BackgroundColor3=Color3.fromRGB(24,16,50)t.BorderSizePixel=0 t.ZIndex=12 t.Parent=p cr(t,8)local f=Instance.new("Frame")f.Size=UDim2.new(ia or 0,0,1,0)f.BackgroundColor3=fc f.BorderSizePixel=0 f.ZIndex=13 f.Parent=t cr(f,8)local k=Instance.new("Frame")k.Size=UDim2.new(0,28,0,28)k.Position=UDim2.new(ia or 0,-14,0.5,-14)k.BackgroundColor3=kc k.BorderSizePixel=0 k.ZIndex=14 k.Parent=t cr(k,14)return t,f,k end
+local function mkSp(p,y)local f=Instance.new("Frame")f.Size=UDim2.new(1,0,0,1)f.Position=UDim2.new(0,0,0,y)f.BackgroundColor3=Color3.fromRGB(34,22,68)f.BorderSizePixel=0 f.ZIndex=12 f.Parent=p end
+local function mkIn(p,y,ph)local b=Instance.new("TextBox")b.Size=UDim2.new(1,0,0,28)b.Position=UDim2.new(0,0,0,y)b.BackgroundColor3=Color3.fromRGB(18,12,38)b.BorderSizePixel=0 b.Text=""b.PlaceholderText=ph b.PlaceholderColor3=Color3.fromRGB(80,60,120)b.TextColor3=Color3.fromRGB(220,200,255)b.TextSize=11 b.Font=Enum.Font.Gotham b.ZIndex=12 b.Parent=p cr(b,6)return b end
+local bHB=mkB(cM,"ENABLE HITBOX",0,Color3.fromRGB(68,34,175))
+local hbL=mkL(cM,"Hitbox Size: "..HS,40,Color3.fromRGB(212,100,100))
+local hbT,hbF,hbK=mkS(cM,58,Color3.fromRGB(138,22,42),Color3.fromRGB(255,120,120),(HS-HN)/(HX-HN))
+mkSp(cM,82)
+local bE=mkB(cM,"ENABLE ESP + TAGS",88,Color3.fromRGB(12,62,138))
+mkSp(cM,128)
+mkL(cM,"Silent Aim",134,Color3.fromRGB(200,100,255))
+local bSA=mkB(cM,"ENABLE SILENT AIM",152,Color3.fromRGB(90,10,138))
+local saIn=mkIn(cM,192,"Ketik nama (autocomplete)...")
+local saL=mkL(cM,"Target: -",226,Color3.fromRGB(100,200,100))
+local saAC=Instance.new("Frame")saAC.Size=UDim2.new(1,0,0,0)saAC.Position=UDim2.new(0,0,0,248)saAC.BackgroundTransparency=1 saAC.ZIndex=12 saAC.Parent=cM
+local bFl=mkB(cC,"ENABLE FLY",0,Color3.fromRGB(12,62,138))
+local flL=mkL(cC,"Fly Speed: "..FS,40,Color3.fromRGB(152,122,212))
+local flT,flF,flK=mkS(cC,58,Color3.fromRGB(12,62,138),Color3.fromRGB(108,162,255),(FS-FN)/(FX-FN))
+mkSp(cC,82)
+local bNC=mkB(cC,"ENABLE NOCLIP",88,Color3.fromRGB(15,90,50))
+mkSp(cC,128)
+local wsL=mkL(cC,"Walk Speed: "..WS,134,Color3.fromRGB(100,212,120))
+local wsT,wsF,wsK=mkS(cC,152,Color3.fromRGB(15,90,50),Color3.fromRGB(100,220,120),(WS-WN)/(WX-WN))
+mkSp(cC,176)
+local jpL=mkL(cC,"Jump Power: "..JS,182,Color3.fromRGB(100,180,255))
+local jpT,jpF,jpK=mkS(cC,200,Color3.fromRGB(10,60,180),Color3.fromRGB(100,180,255),(JS-JN)/(JX-JN))
+local function stab(t)
+	if t=="M"then cM.Visible=true cC.Visible=false tM.BackgroundColor3=Color3.fromRGB(68,34,175)tM.TextColor3=Color3.fromRGB(255,255,255)tC.BackgroundColor3=Color3.fromRGB(24,16,52)tC.TextColor3=Color3.fromRGB(138,108,198)
+	else cM.Visible=false cC.Visible=true tC.BackgroundColor3=Color3.fromRGB(68,34,175)tC.TextColor3=Color3.fromRGB(255,255,255)tM.BackgroundColor3=Color3.fromRGB(24,16,52)tM.TextColor3=Color3.fromRGB(138,108,198)end
 end
-local PW,PH=240,340
-local side=Instance.new("TextButton")
-side.Size=UDim2.new(0,34,0,100)
-side.Position=UDim2.new(0,4,0.5,-50)
-side.BackgroundColor3=Color3.fromRGB(22,10,55)
-side.BorderSizePixel=0
-side.Text="H\nI\nT\nB\nO\nX"
-side.TextColor3=Color3.fromRGB(185,145,255)
-side.TextSize=10
-side.Font=Enum.Font.GothamBold
-side.ZIndex=20
-side.Parent=sg
-cr(side,6)
-local panel=Instance.new("Frame")
-panel.Size=UDim2.new(0,PW,0,PH)
-panel.Position=UDim2.new(0,42,0.5,-(PH/2))
-panel.BackgroundColor3=Color3.fromRGB(10,8,18)
-panel.BorderSizePixel=0
-panel.ZIndex=10
-panel.Parent=sg
-cr(panel,10)
-local tbar=Instance.new("Frame")
-tbar.Size=UDim2.new(1,0,0,36)
-tbar.BackgroundColor3=Color3.fromRGB(18,10,48)
-tbar.BorderSizePixel=0
-tbar.ZIndex=11
-tbar.Parent=panel
-cr(tbar,10)
-local patch=Instance.new("Frame")
-patch.Size=UDim2.new(1,0,0,12)
-patch.Position=UDim2.new(0,0,1,-12)
-patch.BackgroundColor3=Color3.fromRGB(18,10,48)
-patch.BorderSizePixel=0
-patch.ZIndex=11
-patch.Parent=tbar
-local tlbl=Instance.new("TextLabel")
-tlbl.Size=UDim2.new(1,-70,1,0)
-tlbl.Position=UDim2.new(0,8,0,0)
-tlbl.BackgroundTransparency=1
-tlbl.Text="HITBOX EXPANDER"
-tlbl.TextColor3=Color3.fromRGB(178,142,255)
-tlbl.TextSize=12
-tlbl.Font=Enum.Font.GothamBold
-tlbl.TextXAlignment=Enum.TextXAlignment.Left
-tlbl.ZIndex=12
-tlbl.Parent=tbar
-local minBtn=Instance.new("TextButton")
-minBtn.Size=UDim2.new(0,26,0,26)
-minBtn.Position=UDim2.new(1,-56,0.5,-13)
-minBtn.BackgroundColor3=Color3.fromRGB(38,24,85)
-minBtn.BorderSizePixel=0
-minBtn.Text="-"
-minBtn.TextColor3=Color3.fromRGB(198,172,255)
-minBtn.TextSize=18
-minBtn.Font=Enum.Font.GothamBold
-minBtn.ZIndex=13
-minBtn.Parent=tbar
-cr(minBtn,5)
-local clsBtn=Instance.new("TextButton")
-clsBtn.Size=UDim2.new(0,26,0,26)
-clsBtn.Position=UDim2.new(1,-28,0.5,-13)
-clsBtn.BackgroundColor3=Color3.fromRGB(138,22,42)
-clsBtn.BorderSizePixel=0
-clsBtn.Text="X"
-clsBtn.TextColor3=Color3.fromRGB(255,182,182)
-clsBtn.TextSize=12
-clsBtn.Font=Enum.Font.GothamBold
-clsBtn.ZIndex=13
-clsBtn.Parent=tbar
-cr(clsBtn,5)
-local tabRow=Instance.new("Frame")
-tabRow.Size=UDim2.new(1,-10,0,30)
-tabRow.Position=UDim2.new(0,5,0,38)
-tabRow.BackgroundColor3=Color3.fromRGB(14,10,28)
-tabRow.BorderSizePixel=0
-tabRow.ZIndex=11
-tabRow.Parent=panel
-cr(tabRow,6)
-local tM=Instance.new("TextButton")
-tM.Size=UDim2.new(0.5,-3,1,-6)
-tM.Position=UDim2.new(0,3,0,3)
-tM.BackgroundColor3=Color3.fromRGB(68,34,175)
-tM.BorderSizePixel=0
-tM.Text="MAIN"
-tM.TextColor3=Color3.fromRGB(255,255,255)
-tM.TextSize=11
-tM.Font=Enum.Font.GothamBold
-tM.ZIndex=12
-tM.Parent=tabRow
-cr(tM,5)
-local tC=Instance.new("TextButton")
-tC.Size=UDim2.new(0.5,-3,1,-6)
-tC.Position=UDim2.new(0.5,0,0,3)
-tC.BackgroundColor3=Color3.fromRGB(24,16,52)
-tC.BorderSizePixel=0
-tC.Text="CHARACTER"
-tC.TextColor3=Color3.fromRGB(138,108,198)
-tC.TextSize=11
-tC.Font=Enum.Font.GothamBold
-tC.ZIndex=12
-tC.Parent=tabRow
-cr(tC,5)
-local cM=Instance.new("Frame")
-cM.Size=UDim2.new(1,0,0,PH-72)
-cM.Position=UDim2.new(0,0,0,72)
-cM.BackgroundTransparency=1
-cM.ZIndex=11
-cM.Visible=true
-cM.Parent=panel
-local cCh=Instance.new("Frame")
-cCh.Size=UDim2.new(1,0,0,PH-72)
-cCh.Position=UDim2.new(0,0,0,72)
-cCh.BackgroundTransparency=1
-cCh.ZIndex=11
-cCh.Visible=false
-cCh.Parent=panel
-local function mkB(par,txt,y,col)
-	local b=Instance.new("TextButton")
-	b.Size=UDim2.new(1,-10,0,34)
-	b.Position=UDim2.new(0,5,0,y)
-	b.BackgroundColor3=col or Color3.fromRGB(68,34,175)
-	b.BorderSizePixel=0
-	b.Text=txt
-	b.TextColor3=Color3.fromRGB(255,255,255)
-	b.TextSize=12
-	b.Font=Enum.Font.GothamBold
-	b.ZIndex=12
-	b.Parent=par
-	cr(b,6)
-	return b
-end
-local function mkSep(par,y)
-	local f=Instance.new("Frame")
-	f.Size=UDim2.new(1,-10,0,1)
-	f.Position=UDim2.new(0,5,0,y)
-	f.BackgroundColor3=Color3.fromRGB(34,22,68)
-	f.BorderSizePixel=0
-	f.ZIndex=12
-	f.Parent=par
-end
-local function mkLbl(par,txt,y,col)
-	local l=Instance.new("TextLabel")
-	l.Size=UDim2.new(1,-10,0,16)
-	l.Position=UDim2.new(0,5,0,y)
-	l.BackgroundTransparency=1
-	l.Text=txt
-	l.TextColor3=col or Color3.fromRGB(152,122,212)
-	l.TextSize=11
-	l.Font=Enum.Font.Gotham
-	l.TextXAlignment=Enum.TextXAlignment.Left
-	l.ZIndex=12
-	l.Parent=par
-	return l
-end
-local function mkSlider(par,y,fc,kc)
-	local tr=Instance.new("Frame")
-	tr.Size=UDim2.new(1,-10,0,16)
-	tr.Position=UDim2.new(0,5,0,y)
-	tr.BackgroundColor3=Color3.fromRGB(24,16,50)
-	tr.BorderSizePixel=0
-	tr.ZIndex=12
-	tr.Parent=par
-	cr(tr,8)
-	local fi=Instance.new("Frame")
-	fi.Size=UDim2.new(0,0,1,0)
-	fi.BackgroundColor3=fc or Color3.fromRGB(12,62,138)
-	fi.BorderSizePixel=0
-	fi.ZIndex=13
-	fi.Parent=tr
-	cr(fi,8)
-	local kn=Instance.new("Frame")
-	kn.Size=UDim2.new(0,28,0,28)
-	kn.Position=UDim2.new(0,-14,0.5,-14)
-	kn.BackgroundColor3=kc or Color3.fromRGB(108,162,255)
-	kn.BorderSizePixel=0
-	kn.ZIndex=14
-	kn.Parent=tr
-	cr(kn,14)
-	return tr,fi,kn
-end
-local function mkStat(par,y)
-	local l=Instance.new("TextLabel")
-	l.Size=UDim2.new(1,-10,0,20)
-	l.Position=UDim2.new(0,5,0,y)
-	l.BackgroundTransparency=1
-	l.Text="All OFF"
-	l.TextColor3=Color3.fromRGB(78,58,118)
-	l.TextSize=10
-	l.Font=Enum.Font.Gotham
-	l.TextXAlignment=Enum.TextXAlignment.Center
-	l.TextWrapped=true
-	l.ZIndex=12
-	l.Parent=par
-	return l
-end
-local bHB=mkB(cM,"ENABLE HITBOX",4,Color3.fromRGB(68,34,175))
-local hbLbl=mkLbl(cM,"Hitbox Size: "..HB_SIZE,43,Color3.fromRGB(212,100,100))
-local hbT,hbF,hbK=mkSlider(cM,61,Color3.fromRGB(138,22,42),Color3.fromRGB(255,120,120))
-local hbA=(HB_SIZE-HB_MIN)/(HB_MAX-HB_MIN)
-hbF.Size=UDim2.new(hbA,0,1,0)
-hbK.Position=UDim2.new(hbA,-14,0.5,-14)
-local bESP=mkB(cM,"ENABLE ESP + TAGS",83,Color3.fromRGB(12,62,138))
-mkSep(cM,122)
-local stM=mkStat(cM,126)
-local bFly=mkB(cCh,"ENABLE FLY",4,Color3.fromRGB(12,62,138))
-local bNC=mkB(cCh,"ENABLE NOCLIP",43,Color3.fromRGB(15,90,50))
-local spLbl=mkLbl(cCh,"Fly Speed: "..flySpd,82,Color3.fromRGB(152,122,212))
-local slT,slF,slK=mkSlider(cCh,100,Color3.fromRGB(12,62,138),Color3.fromRGB(108,162,255))
-local flyA=(flySpd-FLY_MIN)/(FLY_MAX-FLY_MIN)
-slF.Size=UDim2.new(flyA,0,1,0)
-slK.Position=UDim2.new(flyA,-14,0.5,-14)
-local wsLbl=mkLbl(cCh,"Walk Speed: "..walkSpd,122,Color3.fromRGB(100,212,120))
-local wsT,wsF,wsK=mkSlider(cCh,140,Color3.fromRGB(15,90,50),Color3.fromRGB(100,220,120))
-local wsA=(walkSpd-WS_MIN)/(WS_MAX-WS_MIN)
-wsF.Size=UDim2.new(wsA,0,1,0)
-wsK.Position=UDim2.new(wsA,-14,0.5,-14)
-mkSep(cCh,164)
-local stC=mkStat(cCh,168)
-local function setTab(t)
-	if t=="MAIN"then
-		cM.Visible=true cCh.Visible=false
-		tM.BackgroundColor3=Color3.fromRGB(68,34,175) tM.TextColor3=Color3.fromRGB(255,255,255)
-		tC.BackgroundColor3=Color3.fromRGB(24,16,52) tC.TextColor3=Color3.fromRGB(138,108,198)
-	else
-		cM.Visible=false cCh.Visible=true
-		tC.BackgroundColor3=Color3.fromRGB(68,34,175) tC.TextColor3=Color3.fromRGB(255,255,255)
-		tM.BackgroundColor3=Color3.fromRGB(24,16,52) tM.TextColor3=Color3.fromRGB(138,108,198)
-	end
-end
-tM.MouseButton1Click:Connect(function()setTab("MAIN")end)
-tC.MouseButton1Click:Connect(function()setTab("CHARACTER")end)
-local pOpen,pMin=true,false
-local TI=TweenInfo.new(0.15,Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
-local function openP()
-	pOpen=true panel.Visible=true
-	TS:Create(panel,TI,{Size=UDim2.new(0,PW,0,pMin and 36 or PH)}):Play()
-	side.Text="H\nI\nT\nB\nO\nX" side.BackgroundColor3=Color3.fromRGB(22,10,55)
-end
-local function closeP()
-	pOpen=false
-	local tw=TS:Create(panel,TI,{Size=UDim2.new(0,0,0,PH)})
-	tw.Completed:Connect(function()if not pOpen then panel.Visible=false end end)
-	tw:Play()
-	side.Text=">" side.BackgroundColor3=Color3.fromRGB(68,34,175)
-end
-local function setMin(v)
-	pMin=v
-	if v then
-		cM.Visible=false cCh.Visible=false tabRow.Visible=false
-		TS:Create(panel,TI,{Size=UDim2.new(0,PW,0,36)}):Play() minBtn.Text="+"
-	else
-		TS:Create(panel,TI,{Size=UDim2.new(0,PW,0,PH)}):Play()
-		task.delay(0.15,function()tabRow.Visible=true setTab("MAIN")end)
-		minBtn.Text="-"
-	end
-end
-side.MouseButton1Click:Connect(function()if pOpen then closeP()else openP()end end)
-clsBtn.MouseButton1Click:Connect(closeP)
-minBtn.MouseButton1Click:Connect(function()setMin(not pMin)end)
-local drag,dS,dO=false,nil,nil
-tbar.InputBegan:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-		if i.Target==minBtn or i.Target==clsBtn then return end
-		drag=true dS=i.Position dO=panel.Position
-	end
-end)
-tbar.InputEnded:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then drag=false end
-end)
+tM.MouseButton1Click:Connect(function()stab("M")end)tC.MouseButton1Click:Connect(function()stab("C")end)
+local op=true
+sd.MouseButton1Click:Connect(function()op=not op pn.Visible=op sd.Text=op and"H\nI\nT\nB\nO\nX"or">"sd.BackgroundColor3=op and Color3.fromRGB(22,10,55)or Color3.fromRGB(68,34,175)end)
+xb.MouseButton1Click:Connect(function()pn.Visible=false op=false sd.Text=">"sd.BackgroundColor3=Color3.fromRGB(68,34,175)end)
+local dg,dS,dO=false,nil,nil
+tb.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then if i.Target==xb then return end dg=true dS=i.Position dO=pn.Position end end)
+tb.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dg=false end end)
 UIS.InputChanged:Connect(function(i)
-	if drag and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then
-		local d=i.Position-dS
-		panel.Position=UDim2.new(dO.X.Scale,dO.X.Offset+d.X,dO.Y.Scale,dO.Y.Offset+d.Y)
-		side.Position=UDim2.new(0,panel.AbsolutePosition.X-40,0,panel.AbsolutePosition.Y+PH/2-50)
-	end
+	if dg and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then local d=i.Position-dS pn.Position=UDim2.new(dO.X.Scale,dO.X.Offset+d.X,dO.Y.Scale,dO.Y.Offset+d.Y)sd.Position=UDim2.new(0,pn.AbsolutePosition.X-40,0,pn.AbsolutePosition.Y+50)end
 end)
-local hbDrag=false
-hbT.InputBegan:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then hbDrag=true end
-end)
-UIS.InputEnded:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then hbDrag=false end
-end)
-UIS.InputChanged:Connect(function(i)
-	if hbDrag and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then
-		local a=math.clamp((i.Position.X-hbT.AbsolutePosition.X)/hbT.AbsoluteSize.X,0,1)
-		HB_SIZE=math.max(1,math.floor(HB_MIN+a*(HB_MAX-HB_MIN)))
-		hbF.Size=UDim2.new(a,0,1,0) hbK.Position=UDim2.new(a,-14,0.5,-14)
-		hbLbl.Text="Hitbox Size: "..HB_SIZE
-	end
-end)
-local slDrag=false
-slT.InputBegan:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then slDrag=true end
-end)
-UIS.InputEnded:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then slDrag=false end
-end)
-UIS.InputChanged:Connect(function(i)
-	if slDrag and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then
-		local a=math.clamp((i.Position.X-slT.AbsolutePosition.X)/slT.AbsoluteSize.X,0,1)
-		flySpd=math.floor(FLY_MIN+a*(FLY_MAX-FLY_MIN))
-		slF.Size=UDim2.new(a,0,1,0) slK.Position=UDim2.new(a,-14,0.5,-14)
-		spLbl.Text="Fly Speed: "..flySpd
-	end
-end)
-local wsDrag=false
-wsT.InputBegan:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then wsDrag=true end
-end)
-UIS.InputEnded:Connect(function(i)
-	if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then wsDrag=false end
-end)
-UIS.InputChanged:Connect(function(i)
-	if wsDrag and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then
-		local a=math.clamp((i.Position.X-wsT.AbsolutePosition.X)/wsT.AbsoluteSize.X,0,1)
-		walkSpd=math.floor(WS_MIN+a*(WS_MAX-WS_MIN))
-		wsF.Size=UDim2.new(a,0,1,0) wsK.Position=UDim2.new(a,-14,0.5,-14)
-		wsLbl.Text="Walk Speed: "..walkSpd
-		local mc=LP.Character
-		if mc then local h=mc:FindFirstChildOfClass("Humanoid") if h then h.WalkSpeed=walkSpd end end
-	end
-end)
-local function updS()
-	local m={}
-	if hbOn then table.insert(m,"HB:"..HB_SIZE)end
-	if espOn then table.insert(m,"ESP")end
-	stM.Text=#m>0 and("ON: "..table.concat(m," | "))or"All OFF"
-	local c={}
-	if flyOn then table.insert(c,"Fly "..flySpd)end
-	if ncOn then table.insert(c,"Noclip")end
-	table.insert(c,"WS:"..walkSpd)
-	stC.Text=table.concat(c," | ")
+local function slDrag(trk,fi,kn,mn,mx,cb)
+	local dr=false
+	trk.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dr=true end end)
+	UIS.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dr=false end end)
+	UIS.InputChanged:Connect(function(i)
+		if dr and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then
+			local a=math.clamp((i.Position.X-trk.AbsolutePosition.X)/trk.AbsoluteSize.X,0,1)
+			fi.Size=UDim2.new(a,0,1,0)kn.Position=UDim2.new(a,-14,0.5,-14)cb(math.floor(mn+a*(mx-mn)))
+		end
+	end)
 end
-local function rmBox(ch)
-	if hbBoxes[ch]and hbBoxes[ch].Parent then hbBoxes[ch]:Destroy()end
-	hbBoxes[ch]=nil
+slDrag(hbT,hbF,hbK,HN,HX,function(v)HS=math.max(1,v)hbL.Text="Hitbox Size: "..HS end)
+slDrag(flT,flF,flK,FN,FX,function(v)FS=v flL.Text="Fly Speed: "..FS end)
+slDrag(wsT,wsF,wsK,WN,WX,function(v)WS=v wsL.Text="Walk Speed: "..WS local mc=LP.Character if mc then local h=mc:FindFirstChildOfClass("Humanoid")if h then h.WalkSpeed=WS end end end)
+slDrag(jpT,jpF,jpK,JN,JX,function(v)JS=v jpL.Text="Jump Power: "..JS local mc=LP.Character if mc then local h=mc:FindFirstChildOfClass("Humanoid")if h then h.JumpPower=JS end end end)
+local function showAC(query)
+	for _,c in ipairs(saAC:GetChildren())do c:Destroy()end
+	if query==""then saAC.Size=UDim2.new(1,0,0,0)return end
+	local q=query:lower()
+	local matches={}
+	for _,pl in ipairs(Pl:GetPlayers())do
+		if pl~=LP and pl.Name:lower():sub(1,#q)==q then table.insert(matches,pl.Name)end
+	end
+	local yy=0
+	for _,name in ipairs(matches)do
+		local b=Instance.new("TextButton")b.Size=UDim2.new(1,0,0,26)b.Position=UDim2.new(0,0,0,yy)b.BackgroundColor3=Color3.fromRGB(20,12,45)b.BorderSizePixel=0
+		b.Text=" "..name b.TextColor3=Color3.fromRGB(200,180,255)b.TextSize=10 b.Font=Enum.Font.Gotham b.TextXAlignment=Enum.TextXAlignment.Left b.ZIndex=12 b.Parent=saAC cr(b,4)
+		b.MouseButton1Click:Connect(function()saTgt=name saIn.Text=name saL.Text="Target: "..name for _,c in ipairs(saAC:GetChildren())do c:Destroy()end saAC.Size=UDim2.new(1,0,0,0)end)
+		yy=yy+28
+	end
+	saAC.Size=UDim2.new(1,0,0,yy)
 end
-local function mkBox(ch,root)
-	if not hbBoxes[ch]or not hbBoxes[ch].Parent then
+saIn:GetPropertyChangedSignal("Text"):Connect(function()showAC(saIn.Text)end)
+saIn.FocusLost:Connect(function()
+	if saIn.Text~=""then local q=saIn.Text:lower()for _,pl in ipairs(Pl:GetPlayers())do if pl~=LP and pl.Name:lower():sub(1,#q)==q then saTgt=pl.Name saIn.Text=pl.Name saL.Text="Target: "..pl.Name break end end end
+	for _,c in ipairs(saAC:GetChildren())do c:Destroy()end saAC.Size=UDim2.new(1,0,0,0)
+end)
+local function rmB(ch)if hbB[ch]and hbB[ch].Parent then hbB[ch]:Destroy()end hbB[ch]=nil end
+local function mkBx(ch,rt)
+	if not hbB[ch]or not hbB[ch].Parent then
 		local b=Instance.new("Part")
-		b.Anchored=true b.CanCollide=false b.CanTouch=false b.CanQuery=false
-		b.Massless=true b.CastShadow=false
+		b.Anchored=true
+		b.CanCollide=false
+		b.CanTouch=false
+		b.CanQuery=false
+		b.Massless=true
+		b.CastShadow=false
 		b.BrickColor=BrickColor.new("Bright red")
 		b.Material=Enum.Material.Neon
 		b.Transparency=0.5
 		b.Parent=workspace.CurrentCamera
-		hbBoxes[ch]=b
+		hbB[ch]=b
 	end
-	hbBoxes[ch].Size=Vector3.new(HB_SIZE,HB_SIZE,HB_SIZE)
-	hbBoxes[ch].CFrame=root.CFrame
+	hbB[ch].Size=Vector3.new(HS,HS,HS)
+	hbB[ch].CFrame=rt.CFrame
 end
-local function rmHL(ch)
-	if hls[ch]and hls[ch].Parent then hls[ch]:Destroy()end hls[ch]=nil
-end
-local function mkHL(ch)
-	if hls[ch]and hls[ch].Parent then return end
-	local h=Instance.new("Highlight") h.Adornee=ch
-	h.FillColor=Color3.fromRGB(255,50,50) h.OutlineColor=Color3.fromRGB(255,255,255)
-	h.FillTransparency=0.55 h.OutlineTransparency=0
-	h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop h.Parent=ch hls[ch]=h
-end
-local function rmTag(ch)
-	if tags[ch]and tags[ch].Parent then tags[ch]:Destroy()end tags[ch]=nil
-end
-local function mkTag(ch,pl)
+local function rmH(ch)if hls[ch]and hls[ch].Parent then hls[ch]:Destroy()end hls[ch]=nil end
+local function mkH(ch)if hls[ch]and hls[ch].Parent then return end local h=Instance.new("Highlight")h.Adornee=ch h.FillColor=Color3.fromRGB(255,50,50)h.OutlineColor=Color3.fromRGB(255,255,255)h.FillTransparency=0.55 h.OutlineTransparency=0 h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop h.Parent=ch hls[ch]=h end
+local function rmT(ch)if tags[ch]and tags[ch].Parent then tags[ch]:Destroy()end tags[ch]=nil end
+local function mkT(ch,pl)
 	if tags[ch]and tags[ch].Parent then return end
-	local head=ch:FindFirstChild("Head") if not head then return end
-	local bb=Instance.new("BillboardGui") bb.Adornee=head bb.AlwaysOnTop=true
-	bb.Size=UDim2.new(0,100,0,38) bb.StudsOffset=Vector3.new(0,2.5,0)
-	bb.ResetOnSpawn=false bb.Parent=ch
-	local bg=Instance.new("Frame") bg.Size=UDim2.new(1,0,1,0)
-	bg.BackgroundColor3=Color3.fromRGB(8,5,16) bg.BackgroundTransparency=0.3
-	bg.BorderSizePixel=0 bg.Parent=bb cr(bg,5)
-	local nl=Instance.new("TextLabel") nl.Size=UDim2.new(1,-4,0.58,0)
-	nl.Position=UDim2.new(0,2,0,2) nl.BackgroundTransparency=1
-	nl.Text=pl.DisplayName nl.TextColor3=Color3.fromRGB(255,70,70)
-	nl.TextSize=8 nl.Font=Enum.Font.GothamBold nl.Parent=bg
-	local hpBg=Instance.new("Frame") hpBg.Name="HPBar"
-	hpBg.Size=UDim2.new(1,-4,0,4) hpBg.Position=UDim2.new(0,2,1,-7)
-	hpBg.BackgroundColor3=Color3.fromRGB(35,6,6) hpBg.BorderSizePixel=0
-	hpBg.Parent=bg cr(hpBg,2)
-	local fill=Instance.new("Frame") fill.Name="Fill"
-	fill.Size=UDim2.new(1,0,1,0) fill.BackgroundColor3=Color3.fromRGB(80,220,80)
-	fill.BorderSizePixel=0 fill.Parent=hpBg cr(fill,2) tags[ch]=bb
+	local hd=ch:FindFirstChild("Head")if not hd then return end
+	local bb=Instance.new("BillboardGui")bb.Adornee=hd bb.AlwaysOnTop=true bb.Size=UDim2.new(0,110,0,50)bb.StudsOffset=Vector3.new(0,2.5,0)bb.ResetOnSpawn=false bb.Parent=ch
+	local bg=Instance.new("Frame")bg.Size=UDim2.new(1,0,1,0)bg.BackgroundColor3=Color3.fromRGB(8,5,16)bg.BackgroundTransparency=0.3 bg.BorderSizePixel=0 bg.Parent=bb cr(bg,5)
+	local dn=Instance.new("TextLabel")dn.Size=UDim2.new(1,-4,0,16)dn.Position=UDim2.new(0,2,0,2)dn.BackgroundTransparency=1 dn.Text=pl.DisplayName dn.TextColor3=Color3.fromRGB(255,70,70)dn.TextSize=8 dn.Font=Enum.Font.GothamBold dn.Parent=bg
+	local un=Instance.new("TextLabel")un.Size=UDim2.new(1,-4,0,13)un.Position=UDim2.new(0,2,0,18)un.BackgroundTransparency=1 un.Text="@"..pl.Name un.TextColor3=Color3.fromRGB(180,180,180)un.TextSize=7 un.Font=Enum.Font.Gotham un.Parent=bg
+	local hpB=Instance.new("Frame")hpB.Name="HPBar"hpB.Size=UDim2.new(1,-4,0,4)hpB.Position=UDim2.new(0,2,1,-7)hpB.BackgroundColor3=Color3.fromRGB(35,6,6)hpB.BorderSizePixel=0 hpB.Parent=bg cr(hpB,2)
+	local fi=Instance.new("Frame")fi.Name="Fill"fi.Size=UDim2.new(1,0,1,0)fi.BackgroundColor3=Color3.fromRGB(80,220,80)fi.BorderSizePixel=0 fi.Parent=hpB cr(fi,2)tags[ch]=bb
 end
-local function updTag(ch)
-	local bb=tags[ch] if not bb or not bb.Parent then return end
-	local hum=ch:FindFirstChildOfClass("Humanoid") if not hum then return end
-	local pct=math.clamp(hum.Health/math.max(hum.MaxHealth,1),0,1)
-	local bg=bb:FindFirstChildOfClass("Frame") if not bg then return end
-	local hpBg=bg:FindFirstChild("HPBar") if not hpBg then return end
-	local fill=hpBg:FindFirstChild("Fill") if not fill then return end
-	fill.Size=UDim2.new(pct,0,1,0)
-	fill.BackgroundColor3=Color3.fromRGB(math.floor((1-pct)*220),math.floor(pct*220),25)
+local function utT(ch)
+	local bb=tags[ch]if not bb or not bb.Parent then return end
+	local hm=ch:FindFirstChildOfClass("Humanoid")if not hm then return end
+	local pct=math.clamp(hm.Health/math.max(hm.MaxHealth,1),0,1)
+	local bg=bb:FindFirstChildOfClass("Frame")if not bg then return end
+	local hp=bg:FindFirstChild("HPBar")if not hp then return end
+	local fi=hp:FindFirstChild("Fill")if not fi then return end
+	fi.Size=UDim2.new(pct,0,1,0)fi.BackgroundColor3=Color3.fromRGB(math.floor((1-pct)*220),math.floor(pct*220),25)
 end
-local function stopFly()
-	flyOn=false
-	if flyC then flyC:Disconnect() flyC=nil end
-	if flyBV and flyBV.Parent then flyBV:Destroy()end flyBV=nil
-	if flyBG and flyBG.Parent then flyBG:Destroy()end flyBG=nil
-	local mc=LP.Character
-	if mc then local h=mc:FindFirstChildOfClass("Humanoid") if h then h.PlatformStand=false end end
+local function stFly()
+	fOn=false if fC then fC:Disconnect()fC=nil end
+	if fBV and fBV.Parent then fBV:Destroy()end fBV=nil
+	if fBG and fBG.Parent then fBG:Destroy()end fBG=nil
+	local mc=LP.Character if mc then local h=mc:FindFirstChildOfClass("Humanoid")if h then h.PlatformStand=false end end
 end
-local function startFly()
-	flyOn=true
-	local mc=LP.Character if not mc then return end
-	local root=mc:FindFirstChild("HumanoidRootPart") if not root then return end
-	local hum=mc:FindFirstChildOfClass("Humanoid") if not hum then return end
-	hum.PlatformStand=true
-	if flyBV and flyBV.Parent then flyBV:Destroy()end
-	if flyBG and flyBG.Parent then flyBG:Destroy()end
-	local bv=Instance.new("BodyVelocity")
-	bv.Velocity=Vector3.zero bv.MaxForce=Vector3.new(1e5,1e5,1e5) bv.P=1e4
-	bv.Parent=root flyBV=bv
-	local bg=Instance.new("BodyGyro")
-	bg.MaxTorque=Vector3.new(1e5,1e5,1e5) bg.P=1e4 bg.D=500
-	bg.CFrame=root.CFrame bg.Parent=root flyBG=bg
+local function goFly()
+	fOn=true local mc=LP.Character if not mc then return end
+	local rt=mc:FindFirstChild("HumanoidRootPart")if not rt then return end
+	local hm=mc:FindFirstChildOfClass("Humanoid")if not hm then return end
+	hm.PlatformStand=true
+	if fBV and fBV.Parent then fBV:Destroy()end if fBG and fBG.Parent then fBG:Destroy()end
+	local bv=Instance.new("BodyVelocity")bv.Velocity=Vector3.zero bv.MaxForce=Vector3.new(1e5,1e5,1e5)bv.P=1e4 bv.Parent=rt fBV=bv
+	local bg=Instance.new("BodyGyro")bg.MaxTorque=Vector3.new(1e5,1e5,1e5)bg.P=1e4 bg.D=500 bg.CFrame=rt.CFrame bg.Parent=rt fBG=bg
 	local cam=workspace.CurrentCamera
-	flyC=RunService.Heartbeat:Connect(function()
-		if not flyOn then return end
+	fC=RS.Heartbeat:Connect(function()
+		if not fOn then return end
 		local mc2=LP.Character if not mc2 then return end
-		if not flyBV or not flyBV.Parent then return end
-		local h2=mc2:FindFirstChildOfClass("Humanoid") if not h2 then return end
-		local r2=mc2:FindFirstChild("HumanoidRootPart") if not r2 then return end
-		local cf=cam.CFrame
-		r2.CFrame=CFrame.new(r2.Position,r2.Position+cf.LookVector)
-		if flyBG and flyBG.Parent then
-			flyBG.CFrame=CFrame.new(r2.Position,r2.Position+cf.LookVector)
-		end
-		local move=h2.MoveDirection local dir=Vector3.zero
-		if move.Magnitude>0 then
-			local lm=cf:VectorToObjectSpace(move)
-			dir=(cf.LookVector*-lm.Z+cf.RightVector*lm.X)
-			if dir.Magnitude>0 then dir=dir.Unit end
-		end
-		flyBV.Velocity=dir*flySpd
-		flyBV.MaxForce=Vector3.new(1e5,1e5,1e5)
+		if not fBV or not fBV.Parent then return end
+		local h2=mc2:FindFirstChildOfClass("Humanoid")if not h2 then return end
+		local r2=mc2:FindFirstChild("HumanoidRootPart")if not r2 then return end
+		local cf=cam.CFrame r2.CFrame=CFrame.new(r2.Position,r2.Position+cf.LookVector)
+		if fBG and fBG.Parent then fBG.CFrame=CFrame.new(r2.Position,r2.Position+cf.LookVector)end
+		local mv=h2.MoveDirection local dir=Vector3.zero
+		if mv.Magnitude>0 then local lm=cf:VectorToObjectSpace(mv)dir=(cf.LookVector*-lm.Z+cf.RightVector*lm.X)if dir.Magnitude>0 then dir=dir.Unit end end
+		fBV.Velocity=dir*FS fBV.MaxForce=Vector3.new(1e5,1e5,1e5)
 	end)
 end
-RunService.Heartbeat:Connect(function()
-	for _,pl in ipairs(Players:GetPlayers())do
+RS.Heartbeat:Connect(function()
+	for _,pl in ipairs(Pl:GetPlayers())do
 		if pl==LP then continue end
 		local ch=pl.Character if not ch then continue end
-		local root=ch:FindFirstChild("HumanoidRootPart") if not root then continue end
+		local rt=ch:FindFirstChild("HumanoidRootPart")if not rt then continue end
 		if hbOn then
-			if not origSz[root]then origSz[root]=root.Size end
-			root.Size=Vector3.new(HB_SIZE,HB_SIZE,HB_SIZE)
-			mkBox(ch,root)
+			rt.Size=Vector3.new(HS,HS,HS)
+			mkBx(ch,rt)
 		else
-			if origSz[root]then root.Size=origSz[root] origSz[root]=nil end
-			if hbBoxes[ch]then rmBox(ch)end
+			if hbB[ch]then rmB(ch)end
 		end
-		if espOn then mkHL(ch) mkTag(ch,pl) updTag(ch)
-		else if hls[ch]then rmHL(ch)end if tags[ch]then rmTag(ch)end end
+		if eOn then mkH(ch)mkT(ch,pl)utT(ch)else if hls[ch]then rmH(ch)end if tags[ch]then rmT(ch)end end
 	end
-	for r in pairs(origSz)do if not r.Parent then origSz[r]=nil end end
-	for ch in pairs(hbBoxes)do if not ch.Parent then rmBox(ch)end end
-	for ch in pairs(hls)do if not ch.Parent then rmHL(ch)end end
-	for ch in pairs(tags)do if not ch.Parent then rmTag(ch)end end
+	if sOn and saTgt~=""then
+		local tp=Pl:FindFirstChild(saTgt)
+		if tp and tp.Character then
+			local th=tp.Character:FindFirstChild("HumanoidRootPart")
+			if th then local mc=LP.Character if mc then local rt=mc:FindFirstChild("HumanoidRootPart")if rt and(th.Position-rt.Position).Magnitude<200 then workspace.CurrentCamera.CFrame=CFrame.new(workspace.CurrentCamera.CFrame.Position,th.Position)end end end
+		end
+	end
+	for ch in pairs(hbB)do if not ch.Parent then rmB(ch)end end
+	for ch in pairs(hls)do if not ch.Parent then rmH(ch)end end
+	for ch in pairs(tags)do if not ch.Parent then rmT(ch)end end
 end)
-RunService.Stepped:Connect(function()
-	if not ncOn then return end
+RS.Stepped:Connect(function()
+	if not nOn then return end
 	local mc=LP.Character if not mc then return end
 	for _,p in ipairs(mc:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=false end end
 end)
-bHB.MouseButton1Click:Connect(function()
-	hbOn=not hbOn bHB.Text=hbOn and"DISABLE HITBOX"or"ENABLE HITBOX"
-	bHB.BackgroundColor3=hbOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(68,34,175)
-	if not hbOn then
-		for r,s in pairs(origSz)do if r.Parent then r.Size=s end end
-		origSz={}
-		for ch in pairs(hbBoxes)do rmBox(ch)end
-	end
-	updS()
-end)
-bESP.MouseButton1Click:Connect(function()
-	espOn=not espOn bESP.Text=espOn and"DISABLE ESP + TAGS"or"ENABLE ESP + TAGS"
-	bESP.BackgroundColor3=espOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(12,62,138)
-	if not espOn then for ch in pairs(hls)do rmHL(ch)end for ch in pairs(tags)do rmTag(ch)end end updS()
-end)
-bFly.MouseButton1Click:Connect(function()
-	if flyOn then stopFly() bFly.Text="ENABLE FLY" bFly.BackgroundColor3=Color3.fromRGB(12,62,138)
-	else startFly() bFly.Text="DISABLE FLY" bFly.BackgroundColor3=Color3.fromRGB(152,26,48)end updS()
-end)
-bNC.MouseButton1Click:Connect(function()
-	ncOn=not ncOn bNC.Text=ncOn and"DISABLE NOCLIP"or"ENABLE NOCLIP"
-	bNC.BackgroundColor3=ncOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(15,90,50)
-	if not ncOn then local mc=LP.Character if mc then for _,p in ipairs(mc:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=true end end end end
-	updS()
-end)
-LP.CharacterAdded:Connect(function()
-	task.wait(1)
-	if flyOn then startFly()end
-	local mc=LP.Character
-	if mc then local h=mc:FindFirstChildOfClass("Humanoid") if h then h.WalkSpeed=walkSpd end end
-end)
-updS()
+bHB.MouseButton1Click:Connect(function()hbOn=not hbOn bHB.Text=hbOn and"DISABLE HITBOX"or"ENABLE HITBOX"bHB.BackgroundColor3=hbOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(68,34,175)if not hbOn then for ch in pairs(hbB)do rmB(ch)end end end)
+bE.MouseButton1Click:Connect(function()eOn=not eOn bE.Text=eOn and"DISABLE ESP + TAGS"or"ENABLE ESP + TAGS"bE.BackgroundColor3=eOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(12,62,138)if not eOn then for ch in pairs(hls)do rmH(ch)end for ch in pairs(tags)do rmT(ch)end end end)
+bSA.MouseButton1Click:Connect(function()sOn=not sOn bSA.Text=sOn and"DISABLE SILENT AIM"or"ENABLE SILENT AIM"bSA.BackgroundColor3=sOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(90,10,138)end)
+bFl.MouseButton1Click:Connect(function()if fOn then stFly()bFl.Text="ENABLE FLY"bFl.BackgroundColor3=Color3.fromRGB(12,62,138)else goFly()bFl.Text="DISABLE FLY"bFl.BackgroundColor3=Color3.fromRGB(152,26,48)end end)
+bNC.MouseButton1Click:Connect(function()nOn=not nOn bNC.Text=nOn and"DISABLE NOCLIP"or"ENABLE NOCLIP"bNC.BackgroundColor3=nOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(15,90,50)if not nOn then local mc=LP.Character if mc then for _,p in ipairs(mc:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=true end end end end end)
+LP.CharacterAdded:Connect(function()task.wait(1)if fOn then goFly()end local mc=LP.Character if mc then local h=mc:FindFirstChildOfClass("Humanoid")if h then h.WalkSpeed=WS h.JumpPower=JS end end end)
+stab("M")
