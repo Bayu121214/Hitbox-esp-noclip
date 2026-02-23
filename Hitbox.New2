@@ -2,11 +2,11 @@ local g=gethui and gethui()or game:GetService("CoreGui")
 for _,v in ipairs(g:GetChildren())do if v.Name=="HBX"then v:Destroy()end end
 local sg=Instance.new("ScreenGui")sg.Name="HBX"sg.ResetOnSpawn=false sg.DisplayOrder=999 sg.IgnoreGuiInset=true sg.Parent=g
 local Pl=game:GetService("Players")local RS=game:GetService("RunService")local UIS=game:GetService("UserInputService")local LP=Pl.LocalPlayer
-local HN,HX,FN,FX,WN,WX,JN,JX=1,100,10,200,1,200,0,500
+local HN,HX,FN,FX,WN,WX,JN,JX=1,1000,10,200,1,200,0,500
 local HS,FS,WS,JS=5,60,16,50
 local hbOn,eOn,nOn,fOn,sOn=false,false,false,false,false
 local saTgt=""
-local hbB,hls,tags={},{},{}
+local hbSB,hls,tags={},{},{}
 local fC,fBV,fBG=nil,nil,nil
 local function cr(p,r)local c=Instance.new("UICorner")c.CornerRadius=UDim.new(0,r or 6)c.Parent=p end
 local sd=Instance.new("TextButton")sd.Size=UDim2.new(0,34,0,100)sd.Position=UDim2.new(0,4,0.5,-50)sd.BackgroundColor3=Color3.fromRGB(22,10,55)sd.BorderSizePixel=0 sd.Text="H\nI\nT\nB\nO\nX"sd.TextColor3=Color3.fromRGB(185,145,255)sd.TextSize=10 sd.Font=Enum.Font.GothamBold sd.ZIndex=20 sd.Parent=sg cr(sd,6)
@@ -99,24 +99,18 @@ saIn.FocusLost:Connect(function()
 	if saIn.Text~=""then local q=saIn.Text:lower()for _,pl in ipairs(Pl:GetPlayers())do if pl~=LP and pl.Name:lower():sub(1,#q)==q then saTgt=pl.Name saIn.Text=pl.Name saL.Text="Target: "..pl.Name break end end end
 	for _,c in ipairs(saAC:GetChildren())do c:Destroy()end saAC.Size=UDim2.new(1,0,0,0)
 end)
-local function rmB(ch)if hbB[ch]and hbB[ch].Parent then hbB[ch]:Destroy()end hbB[ch]=nil end
-local function mkBx(ch,rt)
-	if not hbB[ch]or not hbB[ch].Parent then
-		local b=Instance.new("Part")
-		b.Anchored=true
-		b.CanCollide=false
-		b.CanTouch=false
-		b.CanQuery=false
-		b.Massless=true
-		b.CastShadow=false
-		b.BrickColor=BrickColor.new("Bright red")
-		b.Material=Enum.Material.Neon
-		b.Transparency=0.5
-		b.Parent=workspace.CurrentCamera
-		hbB[ch]=b
+local function rmSB(ch)if hbSB[ch]and hbSB[ch].Parent then hbSB[ch]:Destroy()end hbSB[ch]=nil end
+local function mkSB(ch,rt)
+	if not hbSB[ch]or not hbSB[ch].Parent then
+		local sb=Instance.new("SelectionBox")
+		sb.Color3=Color3.fromRGB(255,0,0)
+		sb.LineThickness=0.05
+		sb.SurfaceTransparency=0.5
+		sb.SurfaceColor3=Color3.fromRGB(255,50,50)
+		sb.Adornee=rt
+		sb.Parent=workspace.CurrentCamera
+		hbSB[ch]=sb
 	end
-	hbB[ch].Size=Vector3.new(HS,HS,HS)
-	hbB[ch].CFrame=rt.CFrame
 end
 local function rmH(ch)if hls[ch]and hls[ch].Parent then hls[ch]:Destroy()end hls[ch]=nil end
 local function mkH(ch)if hls[ch]and hls[ch].Parent then return end local h=Instance.new("Highlight")h.Adornee=ch h.FillColor=Color3.fromRGB(255,50,50)h.OutlineColor=Color3.fromRGB(255,255,255)h.FillTransparency=0.55 h.OutlineTransparency=0 h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop h.Parent=ch hls[ch]=h end
@@ -161,11 +155,19 @@ local function goFly()
 		if not fBV or not fBV.Parent then return end
 		local h2=mc2:FindFirstChildOfClass("Humanoid")if not h2 then return end
 		local r2=mc2:FindFirstChild("HumanoidRootPart")if not r2 then return end
-		local cf=cam.CFrame r2.CFrame=CFrame.new(r2.Position,r2.Position+cf.LookVector)
-		if fBG and fBG.Parent then fBG.CFrame=CFrame.new(r2.Position,r2.Position+cf.LookVector)end
-		local mv=h2.MoveDirection local dir=Vector3.zero
-		if mv.Magnitude>0 then local lm=cf:VectorToObjectSpace(mv)dir=(cf.LookVector*-lm.Z+cf.RightVector*lm.X)if dir.Magnitude>0 then dir=dir.Unit end end
-		fBV.Velocity=dir*FS fBV.MaxForce=Vector3.new(1e5,1e5,1e5)
+		local cf=cam.CFrame
+		local mv=h2.MoveDirection
+		local dir=Vector3.zero
+		if mv.Magnitude>0 then
+			local lm=cf:VectorToObjectSpace(mv)
+			dir=(cf.LookVector*-lm.Z+cf.RightVector*lm.X)
+			if dir.Magnitude>0 then dir=dir.Unit end
+		end
+		fBV.Velocity=dir*FS
+		if dir.Magnitude>0 then
+			r2.CFrame=CFrame.new(r2.Position,r2.Position+cf.LookVector)
+			if fBG and fBG.Parent then fBG.CFrame=CFrame.new(r2.Position,r2.Position+cf.LookVector)end
+		end
 	end)
 end
 RS.Heartbeat:Connect(function()
@@ -173,12 +175,7 @@ RS.Heartbeat:Connect(function()
 		if pl==LP then continue end
 		local ch=pl.Character if not ch then continue end
 		local rt=ch:FindFirstChild("HumanoidRootPart")if not rt then continue end
-		if hbOn then
-			rt.Size=Vector3.new(HS,HS,HS)
-			mkBx(ch,rt)
-		else
-			if hbB[ch]then rmB(ch)end
-		end
+		if hbOn then rt.Size=Vector3.new(HS,HS,HS)mkSB(ch,rt)else if hbSB[ch]then rmSB(ch)end end
 		if eOn then mkH(ch)mkT(ch,pl)utT(ch)else if hls[ch]then rmH(ch)end if tags[ch]then rmT(ch)end end
 	end
 	if sOn and saTgt~=""then
@@ -188,7 +185,7 @@ RS.Heartbeat:Connect(function()
 			if th then local mc=LP.Character if mc then local rt=mc:FindFirstChild("HumanoidRootPart")if rt and(th.Position-rt.Position).Magnitude<200 then workspace.CurrentCamera.CFrame=CFrame.new(workspace.CurrentCamera.CFrame.Position,th.Position)end end end
 		end
 	end
-	for ch in pairs(hbB)do if not ch.Parent then rmB(ch)end end
+	for ch in pairs(hbSB)do if not ch.Parent then rmSB(ch)end end
 	for ch in pairs(hls)do if not ch.Parent then rmH(ch)end end
 	for ch in pairs(tags)do if not ch.Parent then rmT(ch)end end
 end)
@@ -197,7 +194,7 @@ RS.Stepped:Connect(function()
 	local mc=LP.Character if not mc then return end
 	for _,p in ipairs(mc:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=false end end
 end)
-bHB.MouseButton1Click:Connect(function()hbOn=not hbOn bHB.Text=hbOn and"DISABLE HITBOX"or"ENABLE HITBOX"bHB.BackgroundColor3=hbOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(68,34,175)if not hbOn then for ch in pairs(hbB)do rmB(ch)end end end)
+bHB.MouseButton1Click:Connect(function()hbOn=not hbOn bHB.Text=hbOn and"DISABLE HITBOX"or"ENABLE HITBOX"bHB.BackgroundColor3=hbOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(68,34,175)if not hbOn then for ch in pairs(hbSB)do rmSB(ch)end end end)
 bE.MouseButton1Click:Connect(function()eOn=not eOn bE.Text=eOn and"DISABLE ESP + TAGS"or"ENABLE ESP + TAGS"bE.BackgroundColor3=eOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(12,62,138)if not eOn then for ch in pairs(hls)do rmH(ch)end for ch in pairs(tags)do rmT(ch)end end end)
 bSA.MouseButton1Click:Connect(function()sOn=not sOn bSA.Text=sOn and"DISABLE SILENT AIM"or"ENABLE SILENT AIM"bSA.BackgroundColor3=sOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(90,10,138)end)
 bFl.MouseButton1Click:Connect(function()if fOn then stFly()bFl.Text="ENABLE FLY"bFl.BackgroundColor3=Color3.fromRGB(12,62,138)else goFly()bFl.Text="DISABLE FLY"bFl.BackgroundColor3=Color3.fromRGB(152,26,48)end end)
