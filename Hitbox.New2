@@ -6,7 +6,7 @@ local HN,HX,FN,FX,WN,WX,JN,JX=1,150,10,200,1,200,0,500
 local HS,FS,WS,JS=5,60,16,50
 local hbOn,eOn,nOn,fOn,sOn=false,false,false,false,false
 local saTgt=""
-local hbDummy,hbSB,tags={},{},{}
+local hbDummy,hbSB,espHLs,tags={},{},{},{}
 local fC,fBV,fBG=nil,nil,nil
 local function cr(p,r)local c=Instance.new("UICorner")c.CornerRadius=UDim.new(0,r or 6)c.Parent=p end
 local sd=Instance.new("TextButton")sd.Size=UDim2.new(0,34,0,100)sd.Position=UDim2.new(0,4,0.5,-50)sd.BackgroundColor3=Color3.fromRGB(22,10,55)sd.BorderSizePixel=0 sd.Text="H\nI\nT\nB\nO\nX"sd.TextColor3=Color3.fromRGB(185,145,255)sd.TextSize=10 sd.Font=Enum.Font.GothamBold sd.ZIndex=20 sd.Parent=sg cr(sd,6)
@@ -113,7 +113,6 @@ local function mkHB(ch,rt)
 		local sb=Instance.new("SelectionBox")sb.Color3=Color3.fromRGB(255,0,0)sb.LineThickness=0.04 sb.SurfaceTransparency=0.65 sb.SurfaceColor3=Color3.fromRGB(255,60,60)sb.Adornee=hbDummy[ch]sb.Parent=workspace.CurrentCamera hbSB[ch]=sb
 	end
 end
-local espHLs={}
 local function rmEHL(ch)if espHLs[ch]and espHLs[ch].Parent then espHLs[ch]:Destroy()end espHLs[ch]=nil end
 local function mkEHL(ch)
 	if espHLs[ch]and espHLs[ch].Parent then return end
@@ -152,7 +151,7 @@ local function goFly()
 	hm.PlatformStand=true
 	if fBV and fBV.Parent then fBV:Destroy()end if fBG and fBG.Parent then fBG:Destroy()end
 	local bv=Instance.new("BodyVelocity")bv.Velocity=Vector3.zero bv.MaxForce=Vector3.new(1e5,1e5,1e5)bv.P=1e4 bv.Parent=rt fBV=bv
-	local bg=Instance.new("BodyGyro")bg.MaxTorque=Vector3.new(1e5,0,1e5)bg.P=1e4 bg.D=500 bg.CFrame=rt.CFrame bg.Parent=rt fBG=bg
+	local bg=Instance.new("BodyGyro")bg.MaxTorque=Vector3.new(1e5,1e5,1e5)bg.P=1e6 bg.D=500 bg.CFrame=rt.CFrame bg.Parent=rt fBG=bg
 	local cam=workspace.CurrentCamera
 	fC=RS.Heartbeat:Connect(function()
 		if not fOn then return end
@@ -168,11 +167,7 @@ local function goFly()
 			if dir.Magnitude>0 then dir=dir.Unit end
 		end
 		fBV.Velocity=dir*FS
-		-- body hanya rotate sumbu Y, tidak ikut pitch kamera
-		if fBG and fBG.Parent then
-			local yaw=math.atan2(-cf.LookVector.X,-cf.LookVector.Z)
-			fBG.CFrame=CFrame.new(r2.Position)*CFrame.Angles(0,yaw,0)
-		end
+		fBG.CFrame=CFrame.new(r2.Position)*CFrame.Angles(cf:ToEulerAnglesXYZ())
 	end)
 end
 RS.Stepped:Connect(function()
