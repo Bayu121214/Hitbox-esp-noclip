@@ -2,11 +2,11 @@ local g=gethui and gethui()or game:GetService("CoreGui")
 for _,v in ipairs(g:GetChildren())do if v.Name=="HBX"then v:Destroy()end end
 local sg=Instance.new("ScreenGui")sg.Name="HBX"sg.ResetOnSpawn=false sg.DisplayOrder=999 sg.IgnoreGuiInset=true sg.Parent=g
 local Pl=game:GetService("Players")local RS=game:GetService("RunService")local UIS=game:GetService("UserInputService")local LP=Pl.LocalPlayer
-local HN,HX,FN,FX,WN,WX,JN,JX=1,1000,10,200,1,200,0,500
+local HN,HX,FN,FX,WN,WX,JN,JX=1,150,10,200,1,200,0,500
 local HS,FS,WS,JS=5,60,16,50
 local hbOn,eOn,nOn,fOn,sOn=false,false,false,false,false
 local saTgt=""
-local hbSB,hls,tags={},{},{}
+local hbDummy,hbSB,tags={},{},{}
 local fC,fBV,fBG=nil,nil,nil
 local function cr(p,r)local c=Instance.new("UICorner")c.CornerRadius=UDim.new(0,r or 6)c.Parent=p end
 local sd=Instance.new("TextButton")sd.Size=UDim2.new(0,34,0,100)sd.Position=UDim2.new(0,4,0.5,-50)sd.BackgroundColor3=Color3.fromRGB(22,10,55)sd.BorderSizePixel=0 sd.Text="H\nI\nT\nB\nO\nX"sd.TextColor3=Color3.fromRGB(185,145,255)sd.TextSize=10 sd.Font=Enum.Font.GothamBold sd.ZIndex=20 sd.Parent=sg cr(sd,6)
@@ -60,7 +60,10 @@ local dg,dS,dO=false,nil,nil
 tb.InputBegan:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then if i.Target==xb then return end dg=true dS=i.Position dO=pn.Position end end)
 tb.InputEnded:Connect(function(i)if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then dg=false end end)
 UIS.InputChanged:Connect(function(i)
-	if dg and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then local d=i.Position-dS pn.Position=UDim2.new(dO.X.Scale,dO.X.Offset+d.X,dO.Y.Scale,dO.Y.Offset+d.Y)sd.Position=UDim2.new(0,pn.AbsolutePosition.X-40,0,pn.AbsolutePosition.Y+50)end
+	if dg and(i.UserInputType==Enum.UserInputType.MouseMovement or i.UserInputType==Enum.UserInputType.Touch)then
+		local d=i.Position-dS pn.Position=UDim2.new(dO.X.Scale,dO.X.Offset+d.X,dO.Y.Scale,dO.Y.Offset+d.Y)
+		sd.Position=UDim2.new(0,pn.AbsolutePosition.X-40,0,pn.AbsolutePosition.Y+50)
+	end
 end)
 local function slDrag(trk,fi,kn,mn,mx,cb)
 	local dr=false
@@ -82,9 +85,7 @@ local function showAC(query)
 	if query==""then saAC.Size=UDim2.new(1,0,0,0)return end
 	local q=query:lower()
 	local matches={}
-	for _,pl in ipairs(Pl:GetPlayers())do
-		if pl~=LP and pl.Name:lower():sub(1,#q)==q then table.insert(matches,pl.Name)end
-	end
+	for _,pl in ipairs(Pl:GetPlayers())do if pl~=LP and pl.Name:lower():sub(1,#q)==q then table.insert(matches,pl.Name)end end
 	local yy=0
 	for _,name in ipairs(matches)do
 		local b=Instance.new("TextButton")b.Size=UDim2.new(1,0,0,26)b.Position=UDim2.new(0,0,0,yy)b.BackgroundColor3=Color3.fromRGB(20,12,45)b.BorderSizePixel=0
@@ -99,21 +100,25 @@ saIn.FocusLost:Connect(function()
 	if saIn.Text~=""then local q=saIn.Text:lower()for _,pl in ipairs(Pl:GetPlayers())do if pl~=LP and pl.Name:lower():sub(1,#q)==q then saTgt=pl.Name saIn.Text=pl.Name saL.Text="Target: "..pl.Name break end end end
 	for _,c in ipairs(saAC:GetChildren())do c:Destroy()end saAC.Size=UDim2.new(1,0,0,0)
 end)
-local function rmSB(ch)if hbSB[ch]and hbSB[ch].Parent then hbSB[ch]:Destroy()end hbSB[ch]=nil end
-local function mkSB(ch,rt)
+local function rmHB(ch)
+	if hbSB[ch]and hbSB[ch].Parent then hbSB[ch]:Destroy()end hbSB[ch]=nil
+	if hbDummy[ch]and hbDummy[ch].Parent then hbDummy[ch]:Destroy()end hbDummy[ch]=nil
+end
+local function mkHB(ch,rt)
+	if not hbDummy[ch]or not hbDummy[ch].Parent then
+		local d=Instance.new("Part")d.Name="HBX_D"d.Anchored=true d.CanCollide=false d.CanTouch=false d.CanQuery=false d.Massless=true d.CastShadow=false d.Transparency=1 d.Parent=workspace hbDummy[ch]=d
+	end
+	hbDummy[ch].Size=Vector3.new(HS,HS,HS)hbDummy[ch].CFrame=rt.CFrame
 	if not hbSB[ch]or not hbSB[ch].Parent then
-		local sb=Instance.new("SelectionBox")
-		sb.Color3=Color3.fromRGB(255,0,0)
-		sb.LineThickness=0.05
-		sb.SurfaceTransparency=0.5
-		sb.SurfaceColor3=Color3.fromRGB(255,50,50)
-		sb.Adornee=rt
-		sb.Parent=workspace.CurrentCamera
-		hbSB[ch]=sb
+		local sb=Instance.new("SelectionBox")sb.Color3=Color3.fromRGB(255,0,0)sb.LineThickness=0.04 sb.SurfaceTransparency=0.65 sb.SurfaceColor3=Color3.fromRGB(255,60,60)sb.Adornee=hbDummy[ch]sb.Parent=workspace.CurrentCamera hbSB[ch]=sb
 	end
 end
-local function rmH(ch)if hls[ch]and hls[ch].Parent then hls[ch]:Destroy()end hls[ch]=nil end
-local function mkH(ch)if hls[ch]and hls[ch].Parent then return end local h=Instance.new("Highlight")h.Adornee=ch h.FillColor=Color3.fromRGB(255,50,50)h.OutlineColor=Color3.fromRGB(255,255,255)h.FillTransparency=0.55 h.OutlineTransparency=0 h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop h.Parent=ch hls[ch]=h end
+local espHLs={}
+local function rmEHL(ch)if espHLs[ch]and espHLs[ch].Parent then espHLs[ch]:Destroy()end espHLs[ch]=nil end
+local function mkEHL(ch)
+	if espHLs[ch]and espHLs[ch].Parent then return end
+	local h=Instance.new("Highlight")h.Adornee=ch h.FillColor=Color3.fromRGB(255,255,255)h.OutlineColor=Color3.fromRGB(255,255,255)h.FillTransparency=1 h.OutlineTransparency=0 h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop h.Parent=ch espHLs[ch]=h
+end
 local function rmT(ch)if tags[ch]and tags[ch].Parent then tags[ch]:Destroy()end tags[ch]=nil end
 local function mkT(ch,pl)
 	if tags[ch]and tags[ch].Parent then return end
@@ -147,7 +152,7 @@ local function goFly()
 	hm.PlatformStand=true
 	if fBV and fBV.Parent then fBV:Destroy()end if fBG and fBG.Parent then fBG:Destroy()end
 	local bv=Instance.new("BodyVelocity")bv.Velocity=Vector3.zero bv.MaxForce=Vector3.new(1e5,1e5,1e5)bv.P=1e4 bv.Parent=rt fBV=bv
-	local bg=Instance.new("BodyGyro")bg.MaxTorque=Vector3.new(1e5,1e5,1e5)bg.P=1e4 bg.D=500 bg.CFrame=rt.CFrame bg.Parent=rt fBG=bg
+	local bg=Instance.new("BodyGyro")bg.MaxTorque=Vector3.new(1e5,0,1e5)bg.P=1e4 bg.D=500 bg.CFrame=rt.CFrame bg.Parent=rt fBG=bg
 	local cam=workspace.CurrentCamera
 	fC=RS.Heartbeat:Connect(function()
 		if not fOn then return end
@@ -156,27 +161,33 @@ local function goFly()
 		local h2=mc2:FindFirstChildOfClass("Humanoid")if not h2 then return end
 		local r2=mc2:FindFirstChild("HumanoidRootPart")if not r2 then return end
 		local cf=cam.CFrame
-		local mv=h2.MoveDirection
-		local dir=Vector3.zero
+		local mv=h2.MoveDirection local dir=Vector3.zero
 		if mv.Magnitude>0 then
 			local lm=cf:VectorToObjectSpace(mv)
 			dir=(cf.LookVector*-lm.Z+cf.RightVector*lm.X)
 			if dir.Magnitude>0 then dir=dir.Unit end
 		end
 		fBV.Velocity=dir*FS
-		if dir.Magnitude>0 then
-			r2.CFrame=CFrame.new(r2.Position,r2.Position+cf.LookVector)
-			if fBG and fBG.Parent then fBG.CFrame=CFrame.new(r2.Position,r2.Position+cf.LookVector)end
+		-- body hanya rotate sumbu Y, tidak ikut pitch kamera
+		if fBG and fBG.Parent then
+			local yaw=math.atan2(-cf.LookVector.X,-cf.LookVector.Z)
+			fBG.CFrame=CFrame.new(r2.Position)*CFrame.Angles(0,yaw,0)
 		end
 	end)
 end
+RS.Stepped:Connect(function()
+	local mc=LP.Character if not mc then return end
+	if hbOn or nOn then
+		for _,p in ipairs(mc:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=false end end
+	end
+end)
 RS.Heartbeat:Connect(function()
 	for _,pl in ipairs(Pl:GetPlayers())do
 		if pl==LP then continue end
 		local ch=pl.Character if not ch then continue end
 		local rt=ch:FindFirstChild("HumanoidRootPart")if not rt then continue end
-		if hbOn then rt.Size=Vector3.new(HS,HS,HS)mkSB(ch,rt)else if hbSB[ch]then rmSB(ch)end end
-		if eOn then mkH(ch)mkT(ch,pl)utT(ch)else if hls[ch]then rmH(ch)end if tags[ch]then rmT(ch)end end
+		if hbOn then rt.Size=Vector3.new(HS,HS,HS)mkHB(ch,rt)else if hbDummy[ch]or hbSB[ch]then rmHB(ch)end end
+		if eOn then mkEHL(ch)mkT(ch,pl)utT(ch)else if espHLs[ch]then rmEHL(ch)end if tags[ch]then rmT(ch)end end
 	end
 	if sOn and saTgt~=""then
 		local tp=Pl:FindFirstChild(saTgt)
@@ -185,19 +196,24 @@ RS.Heartbeat:Connect(function()
 			if th then local mc=LP.Character if mc then local rt=mc:FindFirstChild("HumanoidRootPart")if rt and(th.Position-rt.Position).Magnitude<200 then workspace.CurrentCamera.CFrame=CFrame.new(workspace.CurrentCamera.CFrame.Position,th.Position)end end end
 		end
 	end
-	for ch in pairs(hbSB)do if not ch.Parent then rmSB(ch)end end
-	for ch in pairs(hls)do if not ch.Parent then rmH(ch)end end
+	for ch in pairs(hbDummy)do if not ch.Parent then rmHB(ch)end end
+	for ch in pairs(espHLs)do if not ch.Parent then rmEHL(ch)end end
 	for ch in pairs(tags)do if not ch.Parent then rmT(ch)end end
 end)
-RS.Stepped:Connect(function()
-	if not nOn then return end
-	local mc=LP.Character if not mc then return end
-	for _,p in ipairs(mc:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=false end end
+bHB.MouseButton1Click:Connect(function()
+	hbOn=not hbOn bHB.Text=hbOn and"DISABLE HITBOX"or"ENABLE HITBOX"
+	bHB.BackgroundColor3=hbOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(68,34,175)
+	if not hbOn then for ch in pairs(hbDummy)do rmHB(ch)end
+		if not nOn then local mc=LP.Character if mc then for _,p in ipairs(mc:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=true end end end end
+	end
 end)
-bHB.MouseButton1Click:Connect(function()hbOn=not hbOn bHB.Text=hbOn and"DISABLE HITBOX"or"ENABLE HITBOX"bHB.BackgroundColor3=hbOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(68,34,175)if not hbOn then for ch in pairs(hbSB)do rmSB(ch)end end end)
-bE.MouseButton1Click:Connect(function()eOn=not eOn bE.Text=eOn and"DISABLE ESP + TAGS"or"ENABLE ESP + TAGS"bE.BackgroundColor3=eOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(12,62,138)if not eOn then for ch in pairs(hls)do rmH(ch)end for ch in pairs(tags)do rmT(ch)end end end)
+bE.MouseButton1Click:Connect(function()eOn=not eOn bE.Text=eOn and"DISABLE ESP + TAGS"or"ENABLE ESP + TAGS"bE.BackgroundColor3=eOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(12,62,138)if not eOn then for ch in pairs(espHLs)do rmEHL(ch)end for ch in pairs(tags)do rmT(ch)end end end)
 bSA.MouseButton1Click:Connect(function()sOn=not sOn bSA.Text=sOn and"DISABLE SILENT AIM"or"ENABLE SILENT AIM"bSA.BackgroundColor3=sOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(90,10,138)end)
 bFl.MouseButton1Click:Connect(function()if fOn then stFly()bFl.Text="ENABLE FLY"bFl.BackgroundColor3=Color3.fromRGB(12,62,138)else goFly()bFl.Text="DISABLE FLY"bFl.BackgroundColor3=Color3.fromRGB(152,26,48)end end)
-bNC.MouseButton1Click:Connect(function()nOn=not nOn bNC.Text=nOn and"DISABLE NOCLIP"or"ENABLE NOCLIP"bNC.BackgroundColor3=nOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(15,90,50)if not nOn then local mc=LP.Character if mc then for _,p in ipairs(mc:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=true end end end end end)
+bNC.MouseButton1Click:Connect(function()
+	nOn=not nOn bNC.Text=nOn and"DISABLE NOCLIP"or"ENABLE NOCLIP"
+	bNC.BackgroundColor3=nOn and Color3.fromRGB(152,26,48)or Color3.fromRGB(15,90,50)
+	if not nOn and not hbOn then local mc=LP.Character if mc then for _,p in ipairs(mc:GetDescendants())do if p:IsA("BasePart")then p.CanCollide=true end end end end
+end)
 LP.CharacterAdded:Connect(function()task.wait(1)if fOn then goFly()end local mc=LP.Character if mc then local h=mc:FindFirstChildOfClass("Humanoid")if h then h.WalkSpeed=WS h.JumpPower=JS end end end)
 stab("M")
